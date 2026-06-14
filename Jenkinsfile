@@ -9,27 +9,29 @@ LOG_MESSAGE
 }
 
 def runAndLog(String command) {
-    sh """
+    def shellScript = '''
         set +e
         touch log.txt
         (
             while true; do
-                echo "[heartbeat] \$(date)"
+                date '+[heartbeat] %Y-%m-%d %H:%M:%S %Z'
                 sleep 30
             done
         ) &
-        HEARTBEAT_PID=\$!
+        HEARTBEAT_PID=$!
 
-        printf '\\n\\$ %s\\n' '${command}' >> log.txt
-        ${command} >> log.txt 2>&1
-        STATUS=\$?
-        printf '\\nCommand exit status: %s\\n' "\$STATUS" >> log.txt
+        printf '\\n$ %s\\n' '__COMMAND__' >> log.txt
+        __COMMAND__ >> log.txt 2>&1
+        STATUS=$?
+        printf '\\nCommand exit status: %s\\n' "$STATUS" >> log.txt
         cat log.txt
 
-        kill "\$HEARTBEAT_PID" 2>/dev/null || true
-        wait "\$HEARTBEAT_PID" 2>/dev/null || true
-        exit "\$STATUS"
-    """
+        kill "$HEARTBEAT_PID" 2>/dev/null || true
+        wait "$HEARTBEAT_PID" 2>/dev/null || true
+        exit "$STATUS"
+    '''.replace('__COMMAND__', command)
+
+    sh shellScript
 }
 
 node {
