@@ -12,18 +12,16 @@ def runAndLog(String command) {
 
 node {
     try {
-        docker.image('node:lts-buster-slim').inside('-p 3001:3000') {
-            withEnv(['CI=true']) {
-                sh 'rm -f log.txt'
+        withEnv(['CI=true']) {
+            sh 'rm -f log.txt'
 
-                stage('Build') {
-                    runAndLog('npm install')
-                    runAndLog('npm run build')
-                }
+            stage('Build') {
+                runAndLog('npm install')
+                runAndLog('npm run build')
+            }
 
-                stage('Test') {
-                    runAndLog('npm test -- --watchAll=false')
-                }
+            stage('Test') {
+                runAndLog('npm test -- --watchAll=false')
             }
         }
     } finally {
