@@ -12,6 +12,10 @@ def runAndLog(String command) {
 
 node {
     try {
+        stage('Checkout') {
+            checkout scm
+        }
+
         withEnv(['CI=true']) {
             sh 'rm -f log.txt'
 
