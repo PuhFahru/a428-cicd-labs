@@ -1,6 +1,22 @@
 def runAndLog(String command) {
     sh """
-        bash -lc 'set +e; ${command} 2>&1 | tee command.log; STATUS=\${PIPESTATUS[0]}; cat command.log >> log.txt; rm -f command.log; exit \$STATUS'
+        #!/usr/bin/env bash
+        set +e
+        touch log.txt
+        (
+            while true; do
+                echo "[heartbeat] \$(date)"
+                sleep 30
+            done
+        ) &
+        HEARTBEAT_PID=\$!
+
+        ${command} 2>&1 | tee -a log.txt
+        STATUS=\${PIPESTATUS[0]}
+
+        kill "\$HEARTBEAT_PID" 2>/dev/null || true
+        wait "\$HEARTBEAT_PID" 2>/dev/null || true
+        exit "\$STATUS"
     """
 }
 
