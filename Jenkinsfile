@@ -1,6 +1,5 @@
 def runAndLog(String command) {
     sh """
-        #!/usr/bin/env bash
         set +e
         touch log.txt
         (
@@ -11,8 +10,9 @@ def runAndLog(String command) {
         ) &
         HEARTBEAT_PID=\$!
 
-        ${command} 2>&1 | tee -a log.txt
-        STATUS=\${PIPESTATUS[0]}
+        ${command} >> log.txt 2>&1
+        STATUS=\$?
+        cat log.txt
 
         kill "\$HEARTBEAT_PID" 2>/dev/null || true
         wait "\$HEARTBEAT_PID" 2>/dev/null || true
@@ -30,7 +30,7 @@ node {
             sh 'rm -f log.txt'
 
             stage('Build') {
-                runAndLog('npm install --no-audit --no-fund')
+                runAndLog('npm install --no-audit --no-fund --prefer-offline')
                 runAndLog('npm run build')
             }
 
