@@ -1,12 +1,6 @@
 def runAndLog(String command) {
     sh """
-        set +e
-        ${command} > command.log 2>&1
-        STATUS=\$?
-        cat command.log
-        cat command.log >> log.txt
-        rm command.log
-        exit \$STATUS
+        bash -lc 'set +e; ${command} 2>&1 | tee command.log; STATUS=\${PIPESTATUS[0]}; cat command.log >> log.txt; rm -f command.log; exit \$STATUS'
     """
 }
 
@@ -16,11 +10,11 @@ node {
             checkout scm
         }
 
-        withEnv(['CI=true']) {
+        withEnv(['CI=true', 'NODE_OPTIONS=--openssl-legacy-provider']) {
             sh 'rm -f log.txt'
 
             stage('Build') {
-                runAndLog('npm install')
+                runAndLog('npm install --no-audit --no-fund')
                 runAndLog('npm run build')
             }
 
