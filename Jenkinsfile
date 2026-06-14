@@ -20,7 +20,7 @@ def runAndLog(String command) {
         ) &
         HEARTBEAT_PID=\$!
 
-        printf '\\n$ %s\\n' '${command}' >> log.txt
+        printf '\\n\\$ %s\\n' '${command}' >> log.txt
         ${command} >> log.txt 2>&1
         STATUS=\$?
         printf '\\nCommand exit status: %s\\n' "\$STATUS" >> log.txt
