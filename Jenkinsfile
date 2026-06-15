@@ -76,13 +76,8 @@ node {
 
             stage('Deploy') {
                 logMessage('Stage started: Deploy')
-                runAndLog('rm -f .pidfile')
-                runAndLog('npx serve -s build -l 3000 > deploy.log 2>&1 & echo $! > .pidfile')
                 logMessage('React App deployed at http://54.146.79.37:3000')
-                runAndLog('sleep 60')
-                runAndLog('cat deploy.log || true')
-                runAndLog('kill $(cat .pidfile)')
-                runAndLog('rm -f .pidfile deploy.log')
+                runAndLog('timeout 60s npx serve -s build -l 3000 || true')
                 logMessage('Stage finished: Deploy')
             }
         }
