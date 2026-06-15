@@ -56,6 +56,7 @@ node {
             stage('Build') {
                 logMessage('Stage started: Build')
                 runAndLog('npm install --no-audit --no-fund --prefer-offline')
+                runAndLog('npm install --no-audit --no-fund --prefer-offline --save-dev serve')
                 runAndLog('npm run build')
                 logMessage('Stage finished: Build')
             }
@@ -64,6 +65,25 @@ node {
                 logMessage('Stage started: Test')
                 runAndLog('npm test -- --watchAll=false')
                 logMessage('Stage finished: Test')
+            }
+
+            stage('Manual Approval') {
+                logMessage('Stage started: Manual Approval')
+                input message: 'Lanjutkan ke tahap Deploy?'
+                logMessage('Manual approval accepted')
+                logMessage('Stage finished: Manual Approval')
+            }
+
+            stage('Deploy') {
+                logMessage('Stage started: Deploy')
+                runAndLog('rm -f .pidfile')
+                runAndLog('npx serve -s build -l 3000 > deploy.log 2>&1 & echo $! > .pidfile')
+                logMessage('React App deployed at http://54.146.79.37:3000')
+                runAndLog('sleep 60')
+                runAndLog('cat deploy.log || true')
+                runAndLog('kill $(cat .pidfile)')
+                runAndLog('rm -f .pidfile deploy.log')
+                logMessage('Stage finished: Deploy')
             }
         }
     } catch (err) {
